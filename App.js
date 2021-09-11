@@ -107,7 +107,9 @@ function Grid({ grid, handleOnPress }) {
                   <Cell
                     key={`${colIdx}-${rowIdx}`}
                     value={value}
-                    onPress={() => handleOnPress(colIdx, rowIdx)}
+                    onPress={() => {
+                      handleOnPress(colIdx, rowIdx);
+                    }}
                   />
                 </View>
               );
@@ -129,19 +131,27 @@ function Cell({ value, onPress }) {
         justifyContent: 'center',
       }}
     >
-      <TouchableWithoutFeedback
-        style={{ width: '100%', height: '100%' }}
+      <TouchableOpacity
+        style={{
+          width: '100%',
+          height: '100%',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
         onPress={onPress}
       >
         <Text
           style={[
             value === 'X' && { color: 'red' },
-            { fontSize: 24, fontWeight: 'bold' },
+            {
+              fontSize: 24,
+              fontWeight: 'bold',
+            },
           ]}
         >
           {value}
         </Text>
-      </TouchableWithoutFeedback>
+      </TouchableOpacity>
     </View>
   );
 }
