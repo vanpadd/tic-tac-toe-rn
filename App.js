@@ -62,6 +62,13 @@ const checkForWin = (flatGrid) => {
   );
 };
 
+const checkForDraw = (flatGrid) => {
+  return (
+    !checkForWin(flatGrid) &&
+    flatGrid.filter(Boolean).length === flatGrid.length
+  );
+};
+
 const reducer = (state, action) => {
   switch (action.type) {
     case 'PRESS':
@@ -81,6 +88,11 @@ const reducer = (state, action) => {
         return nextState;
       }
 
+      if (checkForDraw(flatGrid)) {
+        nextState.status = 'draw';
+        return nextState;
+      }
+
       nextState.turn = NEXT_TURN[turn];
       return nextState;
     case 'RESET':
@@ -93,7 +105,7 @@ const reducer = (state, action) => {
 function Game() {
   const [state, dispatch] = React.useReducer(reducer, getInitialState());
 
-  const { grid } = state;
+  const { grid, turn, status } = state;
 
   const handleOnPress = (x, y) => {
     dispatch({ type: 'PRESS', payload: { x, y } });
@@ -106,7 +118,17 @@ function Game() {
   return (
     <View style={{ alignItems: 'center', flex: 1, paddingTop: 20 }}>
       <View>
-        <Text style={{ paddingBottom: 20 }}>Who's turn is it?</Text>
+        {status === 'inProgress' && (
+          <Text
+            style={{ paddingBottom: 20 }}
+          >{`Who's turn is it? ${turn}`}</Text>
+        )}
+        {status === 'success' && (
+          <Text style={{ paddingBottom: 20 }}>{`${turn} has won!`}</Text>
+        )}
+        {status === 'draw' && (
+          <Text style={{ paddingBottom: 20 }}>{`It's a draw!`}</Text>
+        )}
         <Grid grid={grid} handleOnPress={handleOnPress} />
         <View style={{ paddingTop: 20 }}>
           <Button onPress={handleOnReset} title="Reset"></Button>
