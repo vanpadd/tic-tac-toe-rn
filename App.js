@@ -37,21 +37,54 @@ const NEXT_TURN = {
 const getInitialState = () => ({
   grid: createTicTacToeGrid(),
   turn: 'X',
+  status: 'inProgress',
 });
+
+const checkForThree = (a, b, c) => {
+  if (!a || !b || !c) {
+    return false;
+  }
+  return a === b && b === c;
+};
+
+const checkForWin = (flatGrid) => {
+  const [nw, n, ne, w, c, e, sw, s, se] = flatGrid;
+
+  return (
+    checkForThree(nw, n, ne) ||
+    checkForThree(w, c, e) ||
+    checkForThree(sw, s, se) ||
+    checkForThree(nw, w, sw) ||
+    checkForThree(n, c, s) ||
+    checkForThree(ne, e, se) ||
+    checkForThree(nw, c, se) ||
+    checkForThree(ne, c, sw)
+  );
+};
 
 const reducer = (state, action) => {
   switch (action.type) {
     case 'PRESS':
       const { x, y } = action.payload;
-      const { grid, turn } = state;
+      const { grid, turn, status } = state;
 
-      if (grid[y][x]) {
+      if (grid[y][x] || status === 'success') {
         return state;
       }
       const nextState = JSON.parse(JSON.stringify(state));
       nextState.grid[y][x] = turn;
+
+      const flatGrid = nextState.grid.flat();
+
+      if (checkForWin(flatGrid)) {
+        nextState.status = 'success';
+        return nextState;
+      }
+
       nextState.turn = NEXT_TURN[turn];
       return nextState;
+    case 'RESET':
+      return getInitialState();
     default:
       return state;
   }
@@ -66,13 +99,17 @@ function Game() {
     dispatch({ type: 'PRESS', payload: { x, y } });
   };
 
+  const handleOnReset = () => {
+    dispatch({ type: 'RESET' });
+  };
+
   return (
     <View style={{ alignItems: 'center', flex: 1, paddingTop: 20 }}>
       <View>
         <Text style={{ paddingBottom: 20 }}>Who's turn is it?</Text>
         <Grid grid={grid} handleOnPress={handleOnPress} />
         <View style={{ paddingTop: 20 }}>
-          <Button title="Reset"></Button>
+          <Button onPress={handleOnReset} title="Reset"></Button>
         </View>
       </View>
     </View>
